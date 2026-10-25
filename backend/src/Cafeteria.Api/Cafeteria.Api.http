@@ -1,0 +1,116 @@
+@host = http://localhost:5196
+
+# Después de iniciar sesión, copia el token que devuelve la API
+# y pégalo en la variable que corresponda.
+@tokenAdmin = PEGAR_TOKEN_DEL_ADMIN
+@tokenCliente = PEGAR_TOKEN_DEL_CLIENTE
+
+### Comprobar que la API funciona
+GET {{host}}/api/estado
+
+### Iniciar sesión como administrador
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@cafeteria.com",
+  "password": "Admin123!"
+}
+
+### Iniciar sesión como cliente
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "cliente@cafeteria.com",
+  "password": "Cliente123!"
+}
+
+### Ver el usuario actual
+GET {{host}}/api/auth/yo
+Authorization: Bearer {{tokenCliente}}
+
+### Listar categorías
+GET {{host}}/api/categorias
+
+### Listar productos disponibles
+GET {{host}}/api/productos?soloDisponibles=true
+
+### Buscar productos
+GET {{host}}/api/productos?buscar=café
+
+### Crear un pedido
+POST {{host}}/api/pedidos
+Content-Type: application/json
+Authorization: Bearer {{tokenCliente}}
+
+{
+  "tipo": "Mesa",
+  "numeroMesa": 4,
+  "metodoPago": "Efectivo",
+  "notas": "Sin azúcar",
+  "items": [
+    {
+      "productoId": 1,
+      "cantidad": 2,
+      "notas": ""
+    },
+    {
+      "productoId": 10,
+      "cantidad": 1,
+      "notas": "Para calentar"
+    }
+  ]
+}
+
+### Ver mis pedidos
+GET {{host}}/api/pedidos
+Authorization: Bearer {{tokenCliente}}
+
+### Cancelar un pedido pendiente
+PATCH {{host}}/api/pedidos/1/estado
+Content-Type: application/json
+Authorization: Bearer {{tokenCliente}}
+
+{
+  "estado": "Cancelado"
+}
+
+### Ver todos los pedidos (admin)
+GET {{host}}/api/pedidos
+Authorization: Bearer {{tokenAdmin}}
+
+### Cambiar el estado de un pedido (admin)
+PATCH {{host}}/api/pedidos/1/estado
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "estado": "EnPreparacion"
+}
+
+### Ver el resumen del día (admin)
+GET {{host}}/api/admin/resumen
+Authorization: Bearer {{tokenAdmin}}
+
+### Crear una categoría (admin)
+POST {{host}}/api/categorias
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "nombre": "Postres"
+}
+
+### Crear un producto (admin)
+POST {{host}}/api/productos
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "nombre": "Tarta de limón",
+  "descripcion": "Tarta casera con limón.",
+  "precio": 10.50,
+  "categoriaId": 3,
+  "disponible": true
+}

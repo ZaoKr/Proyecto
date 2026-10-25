@@ -1,0 +1,48 @@
+<section class="mx-auto max-w-md px-4 py-12">
+  <h1 class="font-serif text-3xl font-bold text-amber-950">Iniciar sesión</h1>
+  <p class="mt-2 text-sm text-gray-500">Entra para hacer pedidos y ver tu historial.</p>
+
+  <form
+    (ngSubmit)="iniciarSesion()"
+    class="mt-6 space-y-4 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm"
+  >
+    <label class="block text-sm font-medium text-gray-700">
+      Correo
+      <input
+        name="email"
+        type="email"
+        [(ngModel)]="email"
+        required
+        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-amber-500"
+      />
+    </label>
+
+    <label class="block text-sm font-medium text-gray-700">
+      Contraseña
+      <input
+        name="password"
+        type="password"
+        [(ngModel)]="password"
+        required
+        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-amber-500"
+      />
+    </label>
+
+    @if (error) {
+      <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ error }}</p>
+    }
+
+    <button
+      type="submit"
+      [disabled]="cargando"
+      class="w-full rounded-lg bg-amber-700 px-4 py-2 font-medium text-white hover:bg-amber-800 disabled:opacity-60"
+    >
+      {{ cargando ? 'Entrando...' : 'Entrar' }}
+    </button>
+  </form>
+
+  <p class="mt-4 text-center text-sm text-gray-600">
+    ¿No tienes cuenta?
+    <a routerLink="/registro" class="font-medium text-amber-700 hover:text-amber-800">Regístrate</a>
+  </p>
+</section>

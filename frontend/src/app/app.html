@@ -1,0 +1,76 @@
+<nav class="sticky top-0 z-20 border-b border-amber-300 bg-amber-200/95 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+    <a routerLink="/" class="flex items-center gap-2 text-lg font-semibold text-amber-950">
+      <span aria-hidden="true">☕</span>
+      Cafetería Aroma
+    </a>
+
+    <div class="flex flex-wrap items-center gap-4 text-sm font-medium text-amber-900">
+      <a
+        routerLink="/"
+        routerLinkActive="text-amber-700"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="hover:text-amber-700"
+      >
+        Menú
+      </a>
+
+      @if (auth.logueado()) {
+        <a routerLink="/pedidos" routerLinkActive="text-amber-700" class="hover:text-amber-700">
+          Mis pedidos
+        </a>
+
+        @if (auth.esAdmin()) {
+          <a routerLink="/admin" routerLinkActive="text-amber-700" class="hover:text-amber-700">
+            Admin
+          </a>
+        }
+      }
+
+      <a routerLink="/carrito" routerLinkActive="text-amber-700" class="relative hover:text-amber-700">
+        Carrito
+        @if (carrito.cantidad() > 0) {
+          <span
+            class="absolute -right-4 -top-3 rounded-full bg-amber-700 px-1.5 text-xs font-bold text-white"
+          >
+            {{ carrito.cantidad() }}
+          </span>
+        }
+      </a>
+    </div>
+
+    <div class="flex items-center gap-2 text-sm">
+      @if (auth.logueado()) {
+        <span class="hidden font-medium text-amber-950 sm:inline">{{ auth.usuario()?.nombre }}</span>
+        <button
+          type="button"
+          (click)="cerrarSesion()"
+          class="rounded-lg border border-amber-700 px-3 py-2 font-medium text-amber-800 hover:bg-amber-100"
+        >
+          Salir
+        </button>
+      } @else {
+        <a
+          routerLink="/login"
+          class="rounded-lg bg-amber-700 px-3 py-2 font-medium text-white hover:bg-amber-800"
+        >
+          Iniciar sesión
+        </a>
+        <a
+          routerLink="/registro"
+          class="rounded-lg border border-amber-700 px-3 py-2 font-medium text-amber-800 hover:bg-amber-100"
+        >
+          Registrarse
+        </a>
+      }
+    </div>
+  </div>
+</nav>
+
+<main class="min-h-[calc(100vh-140px)]">
+  <router-outlet />
+</main>
+
+<footer class="border-t border-amber-200 bg-amber-200 py-6 text-center text-sm text-amber-950">
+  <p>Cafetería Aroma · Angular + ASP.NET Core + SQLite</p>
+</footer>

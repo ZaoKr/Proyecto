@@ -1,0 +1,300 @@
+<section class="mx-auto max-w-6xl px-4 py-12">
+  @if (!auth.esAdmin()) {
+    <div class="rounded-2xl border border-amber-100 bg-white p-8 text-center shadow-sm">
+      <h1 class="font-serif text-2xl font-bold text-amber-950">Panel de administración</h1>
+      <p class="mt-2 text-gray-600">Necesitas una cuenta de administrador.</p>
+      <a
+        routerLink="/login"
+        [queryParams]="{ returnUrl: '/admin' }"
+        class="mt-4 inline-block rounded-lg bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800"
+      >
+        Iniciar sesión
+      </a>
+    </div>
+  } @else {
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="font-serif text-3xl font-bold text-amber-950">Panel de administración</h1>
+        <p class="mt-1 text-sm text-gray-500">Resumen, productos y categorías.</p>
+      </div>
+
+      <a
+        routerLink="/pedidos"
+        class="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+      >
+        Ver pedidos
+      </a>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <button type="button" (click)="seccion = 'resumen'" [class]="claseSeccion('resumen')">
+        Resumen
+      </button>
+      <button type="button" (click)="seccion = 'productos'" [class]="claseSeccion('productos')">
+        Productos
+      </button>
+      <button type="button" (click)="seccion = 'categorias'" [class]="claseSeccion('categorias')">
+        Categorías
+      </button>
+    </div>
+
+    @if (mensaje()) {
+      <p class="mt-5 rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{{ mensaje() }}</p>
+    }
+
+    @if (error()) {
+      <p class="mt-5 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{{ error() }}</p>
+    }
+
+    @if (cargando()) {
+      <p class="mt-8 text-gray-500">Cargando administración...</p>
+    } @else {
+      @if (seccion === 'resumen') {
+        @if (resumen(); as datos) {
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Pedidos de hoy</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.pedidosHoy }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Ventas de hoy</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">
+                {{ datos.ventasHoy | currency: 'USD' : 'symbol' : '1.2-2' }}
+              </p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Pendientes</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.pendientes }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">En preparación</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.enPreparacion }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Listos</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.listos }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Clientes</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.clientes }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+              <p class="text-sm text-gray-500">Productos</p>
+              <p class="mt-1 text-3xl font-bold text-gray-900">{{ datos.productos }}</p>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-900">Más vendidos hoy</h2>
+
+            @if (datos.topProductos.length === 0) {
+              <p class="mt-2 text-sm text-gray-500">Todavía no hay ventas hoy.</p>
+            } @else {
+              <ul class="mt-3 divide-y divide-amber-50">
+                @for (producto of datos.topProductos; track producto.nombre) {
+                  <li class="flex items-center justify-between py-2 text-sm">
+                    <span class="text-gray-700">{{ producto.nombre }}</span>
+                    <span class="font-medium text-gray-900">{{ producto.cantidad }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      }
+
+      @if (seccion === 'productos') {
+        <div class="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
+          <form
+            (ngSubmit)="guardarProducto()"
+            class="h-fit space-y-3 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm"
+          >
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ productoEditandoId ? 'Editar producto' : 'Nuevo producto' }}
+            </h2>
+
+            <label class="block text-sm font-medium text-gray-700">
+              Nombre
+              <input
+                name="nombre"
+                type="text"
+                [(ngModel)]="productoForm.nombre"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </label>
+
+            <label class="block text-sm font-medium text-gray-700">
+              Descripción
+              <textarea
+                name="descripcion"
+                rows="2"
+                [(ngModel)]="productoForm.descripcion"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              ></textarea>
+            </label>
+
+            <label class="block text-sm font-medium text-gray-700">
+              Precio
+              <input
+                name="precio"
+                type="number"
+                min="0"
+                step="0.01"
+                [(ngModel)]="productoForm.precio"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </label>
+
+            <label class="block text-sm font-medium text-gray-700">
+              Categoría
+              <select
+                name="categoriaId"
+                [(ngModel)]="productoForm.categoriaId"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              >
+                @for (categoria of categorias(); track categoria.id) {
+                  <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <input name="disponible" type="checkbox" [(ngModel)]="productoForm.disponible" />
+              Disponible
+            </label>
+
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-amber-700 px-4 py-2 font-medium text-white hover:bg-amber-800"
+            >
+              {{ productoEditandoId ? 'Guardar cambios' : 'Crear producto' }}
+            </button>
+
+            @if (productoEditandoId) {
+              <button
+                type="button"
+                (click)="limpiarProducto()"
+                class="w-full rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+              >
+                Cancelar edición
+              </button>
+            }
+          </form>
+
+          <div class="space-y-3">
+            @for (producto of productos(); track producto.id) {
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white p-4 shadow-sm"
+              >
+                <div>
+                  <p class="font-semibold text-gray-900">{{ producto.nombre }}</p>
+                  <p class="text-sm text-gray-500">
+                    {{ producto.categoria.nombre }} ·
+                    {{ producto.precio | currency: 'USD' : 'symbol' : '1.2-2' }} ·
+                    {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2 text-sm">
+                  <button
+                    type="button"
+                    (click)="editarProducto(producto)"
+                    class="rounded-lg border border-amber-300 px-3 py-1.5 font-medium text-amber-800 hover:bg-amber-50"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="cambiarDisponibilidad(producto)"
+                    class="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    {{ producto.disponible ? 'Agotar' : 'Activar' }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="eliminarProducto(producto)"
+                    class="rounded-lg border border-red-300 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (seccion === 'categorias') {
+        <div class="mt-6 grid gap-6 lg:grid-cols-[360px_1fr]">
+          <form
+            (ngSubmit)="guardarCategoria()"
+            class="h-fit space-y-3 rounded-2xl border border-amber-100 bg-white p-5 shadow-sm"
+          >
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ categoriaEditandoId ? 'Editar categoría' : 'Nueva categoría' }}
+            </h2>
+
+            <label class="block text-sm font-medium text-gray-700">
+              Nombre
+              <input
+                name="categoriaNombre"
+                type="text"
+                [(ngModel)]="categoriaNombre"
+                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </label>
+
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-amber-700 px-4 py-2 font-medium text-white hover:bg-amber-800"
+            >
+              {{ categoriaEditandoId ? 'Guardar cambios' : 'Crear categoría' }}
+            </button>
+
+            @if (categoriaEditandoId) {
+              <button
+                type="button"
+                (click)="limpiarCategoria()"
+                class="w-full rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+              >
+                Cancelar edición
+              </button>
+            }
+          </form>
+
+          <div class="space-y-3">
+            @for (categoria of categorias(); track categoria.id) {
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-100 bg-white p-4 shadow-sm"
+              >
+                <div>
+                  <p class="font-semibold text-gray-900">{{ categoria.nombre }}</p>
+                  <p class="text-sm text-gray-500">
+                    {{ categoria.cantidadProductos ?? 0 }} productos
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2 text-sm">
+                  <button
+                    type="button"
+                    (click)="editarCategoria(categoria)"
+                    class="rounded-lg border border-amber-300 px-3 py-1.5 font-medium text-amber-800 hover:bg-amber-50"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="eliminarCategoria(categoria)"
+                    class="rounded-lg border border-red-300 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

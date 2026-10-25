@@ -1,44 +1,26 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# Backend
+backend/bin/
+backend/obj/
+backend/artifacts/
+backend/**/bin/
+backend/**/obj/
+backend/**/*.log
+backend/**/*.tmp
+backend/src/Cafeteria.Api/cafeteria.db-shm
+backend/src/Cafeteria.Api/cafeteria.db-wal
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/out-tsc/
+frontend/.vscode/
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
-
-# IDEs and editors
+# Editores y sistema
+.vs/
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/mcp.json
-.history/*
-
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-__screenshots__/
-
-# System files
 .DS_Store
 Thumbs.db
+*.log
+*.tmp
