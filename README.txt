@@ -1,272 +1,455 @@
-CAFETERIA AROMA - BACKEND + FRONTEND
+CAFETERIA AROMA
 
-Proyecto de cafeteria full-stack:
+Este proyecto es una aplicacion web para una cafeteria. Permite ver el menu, armar un carrito, confirmar pedidos y administrar productos, categorias y pedidos.
 
-- Backend: ASP.NET Core + Entity Framework Core + SQLite
-- Frontend: Angular 22 + Tailwind CSS
+La aplicacion tiene dos programas separados:
 
-Estructura de la carpeta:
+- Backend: recibe las peticiones, valida los datos y guarda todo en SQLite.
+- Frontend: muestra la interfaz en el navegador y llama al backend por HTTP.
 
-- backend/ -> API, controladores, modelos y base SQLite
-- frontend/ -> aplicacion web en Angular
-- .gitignore -> archivos fuera del control de versiones
-- README.txt -> este archivo
-
-Los dos proyectos deben correr al mismo tiempo para que la app funcione.
-Los comandos se ejecutan desde la raiz de cafeteria-aroma, salvo aviso.
+Los dos tienen que estar encendidos para usar la aplicacion completa. El backend puede funcionar sin el frontend, y el frontend puede abrirse sin el backend, pero en ese caso no puede cargar ni guardar datos.
 
 
-============================================================
-1. CAMBIOS REALIZADOS
-============================================================
+QUE HACE EL PROYECTO
 
-Backend
--------
-- Migracion completa de PostgreSQL a SQLite.
-- Base de datos ubicada en backend/src/Cafeteria.Api/cafeteria.db.
-- Eliminada la dependencia Npgsql y las cadenas de conexion externas.
-- Preservada la base existente y el usuario clave: mambo@gmail.com / 123456.
-- Autenticacion basada en sesiones con token y PasswordHasher.
-- Codigo fuente limpio, sin comentarios de relleno.
+Como cliente:
 
-Frontend
---------
-- Modulos completos de registro, inicio y cierre de sesion.
-- Conexion del menu con las APIs de categorias y productos.
-- Filtro dinamico por categoria y carrito de compras persistente en localStorage.
-- Selector de modalidad (llevar o mesa), numero de mesa, metodo de pago y notas opcionales.
-- Historial de pedidos del cliente con opcion de cancelacion para ordenes pendientes.
-- Panel de administradores con metricas de ventas, control de estados de pedidos y CRUD total de productos y categorias, incluyendo marcarlos como agotados.
-- Rutas actualizadas en Angular y limpieza del codigo fuente.
+- Ver el menu y filtrar por categoria.
+- Agregar productos al carrito.
+- Cambiar cantidades o quitar productos.
+- Elegir si el pedido es para llevar o en mesa.
+- Indicar el numero de mesa cuando corresponde.
+- Elegir efectivo o tarjeta.
+- Escribir notas para el pedido.
+- Confirmar el pedido.
+- Ver el historial de pedidos.
+- Cancelar un pedido mientras siga pendiente.
 
-Pruebas realizadas
-------------------
-- Backend validado con dotnet build.
-- Frontend compilado con npm run build y testeado con npm test -- --watch=false.
-- Flujo E2E probado con Playwright: registro, login, carrito, pedidos, cancelacion, panel de administracion y gestion de inventario.
+Como administrador:
 
-Estado al empaquetar:
+- Ver pedidos del dia, ventas, pedidos pendientes, pedidos en preparacion y pedidos listos.
+- Ver la cantidad de clientes y de productos.
+- Ver los productos mas vendidos del dia.
+- Ver todos los pedidos de todos los clientes.
+- Cambiar el estado de un pedido.
+- Crear, editar y eliminar productos.
+- Marcar un producto como agotado o volver a activarlo.
+- Crear, editar y eliminar categorias.
 
-- 3 usuarios
-- 4 categorias
-- 16 productos
-- 0 pedidos
+El proyecto no procesa pagos reales. El metodo de pago solo se guarda como dato. Tampoco hace delivery ni reservas de mesas. Solo maneja pedidos para llevar o para consumir en una mesa.
 
 
-============================================================
-2. FUNCIONAMIENTO DEL SISTEMA
-============================================================
+ESTRUCTURA DEL PROYECTO
 
-Flujo del cliente
------------------
-1. Entra al menu principal y filtra por categoria si lo desea.
-2. Agrega productos al carrito. Se guardan localmente.
-3. Va al carrito y define si es para llevar o en mesa, el numero de mesa, el medio de pago y las notas.
-4. Si no ha iniciado sesion, el sistema lo manda al login y lo regresa al carrito.
-5. Confirma el pedido. El carrito se vacia automaticamente.
-6. Revisa el estado en "Mis pedidos" y puede cancelarlo mientras siga pendiente.
+backend/
+  Cafeteria.slnx
+  src/
+    Cafeteria.Api/
+      Program.cs
+      Cafeteria.Api.csproj
+      appsettings.json
+      appsettings.Development.json
+      Properties/
+        launchSettings.json
+      Controllers/
+        ControladorBase.cs
+        AuthController.cs
+        CategoriasController.cs
+        ProductosController.cs
+        PedidosController.cs
+        AdminController.cs
+      Data/
+        CafeteriaContext.cs
+        DatosIniciales.cs
+      Models/
+        Usuario.cs
+        Sesion.cs
+        Categoria.cs
+        Producto.cs
+        Pedido.cs
+        PedidoItem.cs
+      cafeteria.db
 
-Flujo del administrador
------------------------
-1. Entra con credenciales con rol admin.
-2. Accede al enlace "Admin" en la barra de navegacion.
-3. Visualiza las metricas en tiempo real: pedidos del dia, ventas, pendientes, en preparacion, listos, clientes, productos y top de ventas.
-4. Gestiona el inventario: crear, editar, eliminar y agotar productos y categorias.
-5. Actualiza el ciclo de vida de los pedidos (Pendiente -> EnPreparacion -> Listo -> Entregado) o los cancela si hace falta.
+frontend/
+  angular.json
+  package.json
+  package-lock.json
+  src/
+    main.ts
+    index.html
+    styles.css
+    app/
+      app.config.ts
+      app.routes.ts
+      app.ts
+      app.html
+      api.config.ts
+      components/
+        producto-card/
+        productos-menu/
+      models/
+        usuario.ts
+        producto.ts
+        pedido.ts
+      pages/
+        login/
+        registro/
+        carrito/
+        pedidos/
+        admin/
+      services/
+        auth.service.ts
+        catalogo.service.ts
+        carrito.service.ts
+        pedido.service.ts
+        admin.service.ts
 
-Autenticacion y sesiones
-------------------------
-- El backend emite un token al iniciar sesion.
-- El navegador lo almacena y lo adjunta en cada peticion protegida mediante Authorization: Bearer TOKEN.
-- Las sesiones expiran a los 7 dias o al cerrar sesion explicitamente.
-
-Carrito
--------
-- Clave en localStorage: carrito.
-- Acumula cantidades y muestra el total en pantalla.
-- Al confirmar, el backend vuelve a calcular el total con los precios actuales mediante POST /api/pedidos.
+.gitignore
+README.txt
 
 
-============================================================
-3. REQUISITOS TECNICOS
-============================================================
+COMO FUNCIONA EL BACKEND
+
+El backend esta hecho con ASP.NET Core y .NET 10. Usa Entity Framework Core para hablar con SQLite y PasswordHasher para guardar las contrasenas de forma segura.
+
+El arranque esta en Program.cs. Ese archivo hace lo siguiente:
+
+- Registra los controladores con AddControllers.
+- Calcula la ruta del archivo cafeteria.db dentro de la carpeta del proyecto.
+- Configura Entity Framework Core con UseSqlite.
+- Registra PasswordHasher para las contrasenas.
+- Configura CORS para permitir peticiones desde localhost.
+- Ejecuta EnsureCreated para crear las tablas si la base no existe.
+- Ejecuta DatosIniciales.Cargar para crear datos de ejemplo la primera vez.
+- Activa CORS y mapea los controladores.
+- Deja el servidor escuchando en el puerto 5196.
+
+La base de datos se llama cafeteria.db y esta dentro de backend/src/Cafeteria.Api. SQLite guarda todo en ese archivo, asi que no hace falta instalar un servidor de base de datos aparte.
+
+Las tablas se crean a partir de las clases de la carpeta Models. CafeteriaContext define las tablas y las relaciones. Por ejemplo:
+
+- Un usuario puede tener varias sesiones.
+- Una categoria puede tener varios productos.
+- Un pedido pertenece a un usuario.
+- Un pedido tiene varios items.
+- Cada item apunta a un producto.
+
+Tambien hay reglas para no romper el historial. No se puede borrar una categoria que todavia tiene productos. No se puede borrar un producto que aparece en un pedido. No se puede borrar un usuario que tiene pedidos.
+
+DatosIniciales solo carga datos si la tabla de usuarios esta vacia. Si ya hay usuarios, no toca nada. Eso evita duplicar productos o cuentas cada vez que arranca el backend.
+
+Los controladores reciben las peticiones HTTP y devuelven JSON. Estas son las partes principales:
+
+- AuthController: registro, login, logout y datos del usuario actual.
+- CategoriasController: lista, crea, edita y elimina categorias.
+- ProductosController: lista, busca, crea, edita, cambia la disponibilidad y elimina productos.
+- PedidosController: crea pedidos, lista pedidos, muestra un pedido y cambia su estado.
+- AdminController: devuelve el resumen de ventas y pedidos para el panel de administracion.
+- ControladorBase: tiene funciones comunes para leer el token y saber que usuario esta haciendo la peticion.
+
+El controlador base lee la cabecera Authorization. Espera un valor con la forma Bearer TOKEN. Despues busca ese token en la tabla de sesiones y comprueba que no haya vencido. Si la sesion existe, devuelve el usuario. Si no existe, responde con error 401. Si el usuario no es administrador, los endpoints de administracion responden con error 403.
+
+El login funciona asi:
+
+- El usuario envia correo y contrasena.
+- El backend busca el usuario por correo.
+- PasswordHasher verifica la contrasena contra el hash guardado.
+- Si es correcta, se crea una sesion con un token aleatorio.
+- La sesion vence a los 7 dias.
+- El backend devuelve el token y los datos publicos del usuario.
+- El frontend guarda el token y lo envia en las siguientes peticiones protegidas.
+
+Las contrasenas no se guardan en texto plano. Se guarda un hash. El campo PasswordHash tiene JsonIgnore para que nunca salga en una respuesta de la API.
+
+Los pedidos se crean en PedidosController. El backend no confia en el total que muestra el frontend. Recibe los productos y las cantidades, busca el precio actual de cada producto en la base y calcula el total otra vez. Tambien revisa que el producto exista, que este disponible y que la cantidad este entre 1 y 20.
+
+Los estados de un pedido son:
+
+Pendiente
+EnPreparacion
+Listo
+Entregado
+Cancelado
+
+El cliente solo puede cancelar un pedido que este Pendiente. El administrador puede avanzar al siguiente estado o cancelar mientras el pedido no este entregado ni cancelado. No se pueden saltar estados.
+
+El resumen del administrador se calcula con consultas a la base. Cuenta los pedidos del dia, suma las ventas sin contar los cancelados, cuenta los pedidos pendientes, en preparacion y listos, cuenta los clientes y los productos, y arma una lista con los productos mas vendidos del dia.
+
+
+COMO FUNCIONA EL FRONTEND
+
+El frontend esta hecho con Angular 22, TypeScript y Tailwind CSS. Usa servicios para llamar a la API, signals para guardar el estado de la pantalla y localStorage para conservar el carrito y la sesion.
+
+El arranque esta en main.ts. Ese archivo inicia el componente principal App con la configuracion de app.config.ts. Esa configuracion registra el HttpClient, el router y el manejo de errores del navegador.
+
+Las rutas estan en app.routes.ts:
+
+- / muestra el menu.
+- /login muestra el inicio de sesion.
+- /registro muestra el formulario de registro.
+- /carrito muestra el carrito y la confirmacion del pedido.
+- /pedidos muestra el historial del cliente o todos los pedidos si el usuario es administrador.
+- /admin muestra el panel de administracion.
+- Cualquier otra ruta vuelve al menu.
+
+La barra de navegacion esta en app.html. Muestra el menu, el carrito y el nombre del usuario. Si hay una sesion iniciada, muestra Mis pedidos y el boton Salir. Si el usuario es administrador, tambien muestra el enlace Admin. Si no hay sesion, muestra Iniciar sesion y Registrarse.
+
+La direccion de la API esta en api.config.ts:
+
+export const API_URL = 'http://localhost:5196/api';
+
+Los servicios usan esa direccion para armar las peticiones. Por ejemplo, AuthService llama a /auth/login, CatalogoService llama a /productos y PedidoService llama a /pedidos.
+
+Los servicios principales son:
+
+- AuthService: maneja el login, el registro, el cierre de sesion y el token.
+- CatalogoService: obtiene categorias y productos.
+- CarritoService: guarda los productos del carrito, las cantidades y el total.
+- PedidoService: crea pedidos, lista pedidos y cambia el estado de un pedido.
+- AdminService: obtiene el resumen y hace las operaciones de productos y categorias.
+
+AuthService guarda el token y el usuario en localStorage. Tambien tiene dos valores calculados: logueado y esAdmin. logueado indica si hay un usuario guardado. esAdmin indica si el rol es admin.
+
+CarritoService guarda los productos en un signal. La cantidad y el total se calculan con computed. Cuando se agrega un producto que ya existe, se suma la cantidad. El maximo por producto es 20. El carrito se guarda en localStorage con la clave carrito.
+
+Las pantallas principales son:
+
+- ProductosMenu: carga categorias y productos al mismo tiempo, muestra las tarjetas y permite filtrar por categoria.
+- ProductoCard: muestra un producto y emite un evento cuando se pulsa Agregar.
+- Login: valida los campos y guarda la sesion.
+- Registro: valida los campos, confirma la contrasena y crea la cuenta.
+- Carrito: muestra los productos, permite cambiar cantidades y confirma el pedido.
+- Pedidos: muestra el historial, los estados y los botones para cancelar o cambiar el estado.
+- Admin: muestra el resumen, el formulario de productos y el formulario de categorias.
+
+El carrito funciona sin sesion, pero para confirmar el pedido el usuario tiene que iniciar sesion. Si no lo ha hecho, la pagina lo manda al login y despues lo devuelve al carrito. El carrito no se pierde porque esta guardado en localStorage.
+
+Cuando el usuario confirma el pedido, el frontend envia los productos y las cantidades al backend. Si la respuesta es correcta, vacia el carrito y va a la pagina de pedidos. Si hay un error, muestra el mensaje que devuelve la API y deja el carrito como estaba.
+
+El panel de administracion solo carga datos si el usuario tiene rol admin. Si una persona entra a la ruta /admin sin ese rol, la pagina muestra un aviso. De todas formas, la seguridad real esta en el backend, porque cada endpoint de administracion revisa el token y el rol antes de hacer cambios.
+
+Las paginas no usan guards de ruta. Cada componente revisa si hay sesion o si el usuario es administrador. Si alguien modifica localStorage para ponerse rol admin, la pagina podria mostrar el enlace, pero el backend seguiria rechazando las operaciones porque el rol real esta guardado en la base.
+
+
+COMO SE COMUNICAN EL BACKEND Y EL FRONTEND
+
+El frontend no se conecta directamente a SQLite. Solo hace peticiones HTTP al backend. El backend es el unico que abre la base de datos.
+
+El recorrido de una peticion es asi:
+
+1. El usuario hace algo en la pagina.
+2. Un componente de Angular llama a un servicio.
+3. El servicio usa HttpClient para enviar una peticion HTTP.
+4. La peticion llega al backend en el puerto 5196.
+5. ASP.NET Core la dirige al controlador correspondiente.
+6. El controlador valida los datos y usa Entity Framework Core.
+7. Entity Framework Core consulta o modifica SQLite.
+8. El controlador devuelve una respuesta JSON.
+9. Angular recibe la respuesta.
+10. El componente actualiza sus signals y la pantalla cambia.
+
+Un ejemplo de login:
+
+POST http://localhost:5196/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@cafeteria.com",
+  "password": "Admin123!"
+}
+
+Si todo esta bien, el backend responde con un token y los datos del usuario. El frontend guarda el token y lo envia en las peticiones protegidas asi:
+
+Authorization: Bearer TOKEN
+
+Un ejemplo de pedido:
+
+POST http://localhost:5196/api/pedidos
+Authorization: Bearer TOKEN
+Content-Type: application/json
+
+{
+  "tipo": "Mesa",
+  "numeroMesa": 4,
+  "metodoPago": "Efectivo",
+  "notas": "Sin azucar",
+  "items": [
+    {
+      "productoId": 1,
+      "cantidad": 2,
+      "notas": ""
+    }
+  ]
+}
+
+El backend revisa el token, valida los datos, calcula el total y guarda el pedido. Despues devuelve el pedido creado.
+
+El navegador aplica una regla de seguridad llamada CORS. Como el frontend esta en el puerto 4200 y el backend en el 5196, son dos origenes distintos. El backend tiene una politica CORS que permite peticiones desde localhost y desde 127.0.0.1. Por eso la aplicacion funciona en local. Si el frontend se abre desde otra direccion, esa politica tiene que cambiarse.
+
+
+COMO SE EJECUTA
+
+Hace falta tener instalado:
 
 - .NET SDK 10
 - Node.js 22 o superior
 - npm
 
-Verifica las versiones con:
+Para comprobar las versiones:
 
-  dotnet --version
-  node --version
-  npm --version
+dotnet --version
+node --version
+npm --version
 
+Para arrancar el backend, abre una terminal desde la raiz del proyecto:
 
-============================================================
-4. EJECUTAR EL BACKEND
-============================================================
+cd backend
+dotnet run --project src/Cafeteria.Api
 
-Abre una terminal:
+El backend queda disponible en http://localhost:5196.
 
-  cd backend
-  dotnet run --project src/Cafeteria.Api
+Para comprobar que esta funcionando:
 
-La API responde en http://localhost:5196.
+curl http://localhost:5196/api/estado
 
-Prueba rapida de salud:
+La respuesta esperada es un JSON con estado ok, baseDatos SQLite y la hora.
 
-  curl http://localhost:5196/api/estado
+Para arrancar el frontend, abre otra terminal desde la raiz del proyecto:
 
-Respuesta esperada:
+cd frontend
+npm install
+npm start
 
-  {"estado":"ok","baseDatos":"SQLite","hora":"..."}
+El frontend queda disponible en http://localhost:4200. Si ese puerto esta ocupado, se puede usar otro:
 
-Si la base no existe, la primera ejecucion crea las tablas y los datos por defecto. Como cafeteria.db ya esta incluido, el usuario mambo se mantiene intacto.
+npm start -- --port 4201
 
-Para detenerlo presiona Ctrl + C.
-
-
-============================================================
-5. EJECUTAR EL FRONTEND
-============================================================
-
-Abre otra terminal:
-
-  cd frontend
-  npm install
-  npm start
-
-Abre en tu navegador http://localhost:4200. Si el puerto esta ocupado, usa:
-
-  npm start -- --port 4201
-
-La direccion de la API se configura en frontend/src/app/api.config.ts:
-
-  export const API_URL = 'http://localhost:5196/api';
-
-Para detenerlo presiona Ctrl + C.
+Para detener cualquiera de los dos, presiona Ctrl + C en su terminal.
 
 
-============================================================
-6. USUARIOS DE PRUEBA
-============================================================
+USUARIOS DE PRUEBA
 
-- ADMINISTRADOR: admin@cafeteria.com / Admin123!
-- CLIENTE BASE: cliente@cafeteria.com / Cliente123!
-- CLIENTE MAMBO: mambo@gmail.com / 123456
+- Administrador: admin@cafeteria.com / Admin123!
+- Cliente: cliente@cafeteria.com / Cliente123!
 
-Cualquier registro nuevo desde la interfaz entra automaticamente con rol de cliente.
+La base tambien conserva los usuarios que ya existian antes de empaquetar el proyecto. No borres cafeteria.db si quieres mantenerlos.
 
-
-============================================================
-7. CHECKLIST DE VALIDACION RAPIDA
-============================================================
-
-Backend
--------
-[ ] El servidor arranca sin errores en el puerto 5196.
-[ ] Los endpoints devuelven datos: /api/estado, /api/categorias (4), /api/productos (16).
-[ ] El login funciona para mambo y para admin.
-[ ] dotnet build compila sin errores.
-
-Frontend
---------
-[ ] La interfaz carga en el puerto 4200 con los 16 productos listados.
-[ ] Los filtros, el carrito, la persistencia, el login, los pedidos y el panel admin funcionan al 100%.
-[ ] npm run build y npm test -- --watch=false pasan sin fallos.
-
-Pruebas express con curl
-------------------------
-Estado:
-
-  curl http://localhost:5196/api/estado
-
-Productos:
-
-  curl http://localhost:5196/api/productos
-
-Login de mambo:
-
-  curl -X POST http://localhost:5196/api/auth/login \
-    -H "Content-Type: application/json" \
-    -d '{"email":"mambo@gmail.com","password":"123456"}'
+Los usuarios nuevos que se registran desde la pagina entran con rol cliente. El rol administrador no se puede elegir desde el formulario.
 
 
-============================================================
-8. RUTAS DISPONIBLES EN ANGULAR
-============================================================
+COMO PROBAR EL PROYECTO
 
-- / -> Menu de productos
-- /login -> Iniciar sesion
-- /registro -> Crear cuenta nueva
-- /carrito -> Carrito y confirmacion de pedidos
-- /pedidos -> Historial personal, o general si eres admin
-- /admin -> Panel de control, inventario y categorias
+Backend:
 
+- Abrir http://localhost:5196/api/estado y comprobar que responde.
+- Abrir http://localhost:5196/api/categorias y comprobar que devuelve las categorias.
+- Abrir http://localhost:5196/api/productos y comprobar que devuelve los productos.
+- Probar el login con el usuario administrador y con el cliente.
+- Ejecutar dotnet build y comprobar que no hay errores.
 
-============================================================
-9. BASE DE DATOS SQLITE
-============================================================
+Frontend:
 
-Ubicacion:
+- Abrir http://localhost:4200.
+- Comprobar que se ven los productos.
+- Probar el filtro por categoria.
+- Agregar productos al carrito.
+- Recargar la pagina y comprobar que el carrito sigue ahi.
+- Iniciar sesion y confirmar un pedido.
+- Revisar el pedido en Mis pedidos.
+- Cancelar un pedido pendiente.
+- Entrar con el usuario administrador.
+- Revisar el resumen, los productos y las categorias.
+- Cambiar el estado de un pedido.
+- Crear, editar y eliminar un producto o una categoria de prueba.
+- Ejecutar npm run build y npm test -- --watch=false.
 
-  backend/src/Cafeteria.Api/cafeteria.db
-
-- No borres este archivo si quieres conservar los registros y el usuario mambo.
-- Haz respaldos rapidos con:
-
-  cp backend/src/Cafeteria.Api/cafeteria.db cafeteria.db.bak
-
-- Inspecciona la base con la CLI de SQLite:
-
-  sqlite3 backend/src/Cafeteria.Api/cafeteria.db
-
-
-============================================================
-10. COMO SUBIR CAMBIOS A GITHUB
-============================================================
-
-El repositorio del proyecto es:
-
-  https://github.com/ZaoKr/Proyecto
-
-Si ya clonaste el repositorio, solo agrega los cambios, haz commit y sube:
-
-  git add .
-  git commit -m "Actualizo el proyecto"
-  git push origin main
-
-Si estas creando la carpeta desde cero:
-
-  cd cafeteria-aroma
-  git init
-  git add .
-  git commit -m "Estructura base Cafeteria Aroma con Angular y SQLite"
-  git branch -M main
-  git remote add origin https://github.com/ZaoKr/Proyecto.git
-  git push -u origin main
-
-Si el repositorio remoto ya tiene commits y el local no comparte historial, sincroniza primero con:
-
-  git pull origin main --allow-unrelated-histories --no-rebase
+Tambien se probo el flujo completo con Playwright: registro, login, carrito, pedido, cancelacion, panel de administracion, cambio de estados y gestion de productos y categorias.
 
 
-============================================================
-11. PROBLEMAS COMUNES
-============================================================
+BASE DE DATOS
+
+La base esta en:
+
+backend/src/Cafeteria.Api/cafeteria.db
+
+Se incluye en el proyecto para conservar los usuarios y los productos que ya estaban cargados. Si se borra, el backend crea otra base con los datos iniciales, pero se pierden las cuentas y los cambios que se hayan hecho.
+
+Para hacer un respaldo:
+
+cp backend/src/Cafeteria.Api/cafeteria.db cafeteria.db.bak
+
+Para abrir la base con la herramienta de SQLite:
+
+sqlite3 backend/src/Cafeteria.Api/cafeteria.db
+
+Dentro de SQLite se pueden ver las tablas con:
+
+.tables
+
+Y se pueden hacer consultas como:
+
+SELECT * FROM Usuarios;
+SELECT * FROM Productos;
+SELECT * FROM Pedidos;
+
+Para salir:
+
+.quit
+
+Si se cambian las clases de Models, hay que borrar cafeteria.db para que se creen las tablas nuevas. EnsureCreated no actualiza una base que ya existe.
+
+
+ARCHIVOS QUE NO SE SUBEN
+
+El archivo .gitignore deja fuera las carpetas y archivos que se generan al compilar o instalar dependencias:
+
+- node_modules
+- bin
+- obj
+- dist
+- .angular
+- coverage
+- .vscode
+
+La base cafeteria.db si se incluye. No se deben subir tokens, contrasenas ni archivos personales.
+
+
+PROBLEMAS COMUNES
 
 Address already in use:
-El puerto esta ocupado. Liberalo con:
+El puerto ya esta ocupado por otro proceso. Se puede liberar con:
 
-  lsof -ti:5196 | xargs -r kill
-  lsof -ti:4200 | xargs -r kill
+lsof -ti:5196 | xargs -r kill
+lsof -ti:4200 | xargs -r kill
 
 Error de conexion en el menu:
-El backend esta apagado. Enciendelo y vuelve a intentar.
+El backend esta apagado o la direccion de la API no es la correcta. Revisar que el backend este corriendo en el puerto 5196 y que api.config.ts apunte a esa direccion.
 
-No sale el boton Admin:
-Asegurate de iniciar sesion con la cuenta de administrador correcta.
+No aparece el boton Admin:
+El usuario con el que se inicio sesion no tiene rol administrador. Probar con la cuenta de administrador.
 
-============================================================
-FIN DEL README
-============================================================
+No se puede eliminar un producto:
+El producto aparece en algun pedido. En ese caso conviene marcarlo como agotado en lugar de borrarlo.
+
+No se puede eliminar una categoria:
+La categoria todavia tiene productos. Primero hay que mover o eliminar esos productos.
+
+El token no funciona:
+La sesion puede haber vencido. Cerrar sesion y volver a iniciar.
+
+El navegador muestra un error de CORS:
+El frontend se esta abriendo desde una direccion que el backend no permite. En local, usar localhost o 127.0.0.1.
+
+
+COSAS A TENER EN CUENTA
+
+- El backend y el frontend son dos programas distintos. Se levantan en terminales separadas.
+- El frontend necesita al backend para cargar datos, iniciar sesion y confirmar pedidos.
+- El backend no necesita al frontend para funcionar. Se puede probar con curl o con Postman.
+- El carrito se guarda en el navegador, no en la base, hasta que se confirma el pedido.
+- El total del pedido se calcula en el backend, no en el frontend.
+- Las contrasenas se guardan con hash, no en texto plano.
+- Las sesiones se guardan en la base y vencen a los 7 dias.
+- El proyecto esta pensado para uso local y para practica. Para publicarlo en internet habria que usar HTTPS, limitar CORS al dominio real y proteger mejor los tokens.
+
+FIN
