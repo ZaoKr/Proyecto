@@ -78,6 +78,12 @@ public class ProductosController : ControladorBase
 
         string nombre = (request.Nombre ?? "").Trim();
         string descripcion = (request.Descripcion ?? "").Trim();
+        string imgUrl = (request.ImgUrl ?? "").Trim();
+
+        if(string.IsNullOrWhiteSpace(imgUrl))
+        {
+            return BadRequest(new { mensaje = "La URL de la imagen no puede estar vacía." });
+        }
 
         if (nombre.Length < 2)
         {
@@ -89,6 +95,7 @@ public class ProductosController : ControladorBase
             return BadRequest(new { mensaje = "El precio no puede ser negativo." });
         }
 
+        
         Categoria categoria = await Db.Categorias.FindAsync(request.CategoriaId);
 
         if (categoria == null)
@@ -103,7 +110,8 @@ public class ProductosController : ControladorBase
             Precio = request.Precio,
             Disponible = request.Disponible,
             CategoriaId = categoria.Id,
-            Categoria = categoria
+            Categoria = categoria,
+            ImgUrl = imgUrl
         };
 
         Db.Productos.Add(producto);
@@ -162,6 +170,7 @@ public class ProductosController : ControladorBase
         producto.Disponible = request.Disponible;
         producto.CategoriaId = categoria.Id;
         producto.Categoria = categoria;
+        producto.ImgUrl = request.ImgUrl;
 
         await Db.SaveChangesAsync();
 
@@ -244,6 +253,7 @@ public class ProductoRequest
     public string Descripcion { get; set; }
     public decimal Precio { get; set; }
     public bool Disponible { get; set; } = true;
+    public string ImgUrl { get; set; }
     public int CategoriaId { get; set; }
 }
 

@@ -48,7 +48,8 @@ public static class DatosIniciales
                 Nombre = "Café americano",
                 Descripcion = "Café negro recién pasado.",
                 Precio = 6.00m,
-                CategoriaId = calientes.Id
+                CategoriaId = calientes.Id,
+                ImgUrl = "https://www.nescafe.com/es/sites/default/files/2023-09/1_desk.jpg"
             },
             new Producto
             {

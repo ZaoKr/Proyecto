@@ -31,6 +31,7 @@ export class Admin {
     precio: 0,
     disponible: true,
     categoriaId: 0,
+    imgUrl: ''
   };
   protected categoriaEditandoId: number | null = null;
   protected categoriaNombre = '';
@@ -113,6 +114,7 @@ export class Admin {
       precio: producto.precio,
       disponible: producto.disponible,
       categoriaId: producto.categoriaId,
+      imgUrl: producto.imgUrl
     };
     this.seccion = 'productos';
   }
@@ -125,6 +127,7 @@ export class Admin {
       precio: 0,
       disponible: true,
       categoriaId: this.categorias()[0]?.id ?? 0,
+      imgUrl: ''
     };
   }
 

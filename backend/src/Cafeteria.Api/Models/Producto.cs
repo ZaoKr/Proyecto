@@ -6,7 +6,7 @@ public class Producto
     public string Nombre { get; set; } = "";
     public string Descripcion { get; set; } = "";
     public decimal Precio { get; set; }
-
+    public string ImgUrl { get; set; }
     public bool Disponible { get; set; } = true;
 
     public int CategoriaId { get; set; }

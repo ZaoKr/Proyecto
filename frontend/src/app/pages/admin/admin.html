@@ -162,7 +162,16 @@
               <input name="disponible" type="checkbox" [(ngModel)]="productoForm.disponible" />
               Disponible
             </label>
-
+<label class="block text-sm font-medium text-gray-700">
+  URL de la imagen
+  <input
+    name="imgUrl"
+    type="url"
+    required
+    [(ngModel)]="productoForm.imgUrl"
+    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+  />
+</label>
             <button
               type="submit"
               class="w-full rounded-lg bg-amber-700 px-4 py-2 font-medium text-white hover:bg-amber-800"

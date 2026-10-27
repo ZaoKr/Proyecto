@@ -12,6 +12,7 @@ export interface Producto {
   disponible: boolean;
   categoriaId: number;
   categoria: Categoria;
+  imgUrl:string;
 }
 
 export interface ProductoRequest {
@@ -20,4 +21,5 @@ export interface ProductoRequest {
   precio: number;
   disponible: boolean;
   categoriaId: number;
+  imgUrl: string;
 }
