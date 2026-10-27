@@ -81,7 +81,7 @@
                 <li class="flex items-center justify-between gap-3 py-1.5 text-sm">
                   <span class="text-gray-700">{{ item.cantidad }} × {{ item.producto.nombre }}</span>
                   <span class="text-gray-500">
-                    {{ item.precioUnitario * item.cantidad | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    {{ item.precioUnitario * item.cantidad | currency: 'Bs' : 'symbol' : '1.2-2' }}
                   </span>
                 </li>
               }
@@ -93,7 +93,7 @@
 
             <footer class="mt-4 flex flex-wrap items-center justify-between gap-3">
               <p class="text-lg font-bold text-gray-900">
-                Total: {{ pedido.total | currency: 'USD' : 'symbol' : '1.2-2' }}
+                Total: {{ pedido.total | currency: 'Bs' : 'symbol' : '1.2-2' }}
               </p>
 
               <div class="flex flex-wrap gap-2">

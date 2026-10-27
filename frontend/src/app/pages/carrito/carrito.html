@@ -21,7 +21,7 @@
             <div class="flex-1">
               <p class="font-semibold text-gray-900">{{ item.producto.nombre }}</p>
               <p class="text-sm text-gray-500">
-                {{ item.producto.precio | currency: 'USD' : 'symbol' : '1.2-2' }} c/u
+                {{ item.producto.precio | currency: 'Bs' : 'symbol' : '1.2-2' }} c/u
               </p>
             </div>
 
@@ -44,7 +44,7 @@
             </div>
 
             <p class="w-24 text-right font-semibold text-gray-900">
-              {{ item.producto.precio * item.cantidad | currency: 'USD' : 'symbol' : '1.2-2' }}
+              {{ item.producto.precio * item.cantidad | currency: 'Bs' : 'symbol' : '1.2-2' }}
             </p>
 
             <button
@@ -115,7 +115,7 @@
         <div class="flex items-center justify-between border-t border-amber-100 pt-4">
           <span class="font-medium text-gray-700">Total</span>
           <span class="text-xl font-bold text-gray-900">
-            {{ carrito.total() | currency: 'USD' : 'symbol' : '1.2-2' }}
+            {{ carrito.total() | currency: 'Bs' : 'symbol' : '1.2-2' }}
           </span>
         </div>
 

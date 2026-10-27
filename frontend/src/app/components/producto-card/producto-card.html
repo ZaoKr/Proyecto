@@ -3,7 +3,8 @@
 >
   <div class="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-amber-50">
   <img
-    [src]="producto().imgUrl"
+    /* src="https://img.magnific.com/vector-gratis/taza-cafe-granos-cafe_78370-7090.jpg?semt=ais_hybrid&w=740&q=80" */
+    [src]=" imgUrlDefault() "
     [alt]="producto().nombre"
     class="h-full w-full object-cover"
   />
@@ -20,7 +21,7 @@
 
   <div class="mt-5 flex items-center justify-between gap-3">
     <span class="text-2xl font-extrabold text-gray-900">
-      {{ producto().precio | currency: 'USD' : 'symbol' : '1.2-2' }}
+      {{ producto().precio | currency: 'Bs' : 'symbol' : '1.2-2' }}
     </span>
 
     <button
