@@ -152,7 +152,7 @@ public class PedidosController : ControladorBase
             MetodoPago = metodoPago,
             Estado = "Pendiente",
             Notas = notas,
-            CreadoEn = DateTime.Now,
+            CreadoEn = Reloj.Ahora(),
             Total = 0
         };
 

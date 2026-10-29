@@ -96,7 +96,7 @@ public class AuthController : ControladorBase
         }
 
         List<Sesion> vencidas = await Db.Sesiones
-            .Where(s => s.ExpiraEn <= DateTime.Now)
+            .Where(s => s.ExpiraEn <= Reloj.Ahora())
             .ToListAsync();
 
         Db.Sesiones.RemoveRange(vencidas);
@@ -166,7 +166,7 @@ public class AuthController : ControladorBase
         {
             Token = Guid.NewGuid().ToString("N"),
             UsuarioId = usuario.Id,
-            ExpiraEn = DateTime.Now.AddDays(7)
+            ExpiraEn = Reloj.Ahora().AddDays(7)
         };
     }
 }

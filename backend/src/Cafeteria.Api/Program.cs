@@ -120,7 +120,7 @@ app.MapGet("/api/estado", () => Results.Ok(new
 {
     estado = "ok",
     baseDatos = usaPostgres ? "PostgreSQL" : "SQLite",
-    hora = DateTime.Now
+    hora = Reloj.Ahora()
 }));
 
 app.MapFallbackToFile("index.html");

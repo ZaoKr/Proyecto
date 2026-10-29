@@ -28,7 +28,7 @@ public abstract class ControladorBase : ControllerBase
 
         Sesion sesion = Db.Sesiones
             .Include(s => s.Usuario)
-            .FirstOrDefault(s => s.Token == token && s.ExpiraEn > DateTime.Now);
+            .FirstOrDefault(s => s.Token == token && s.ExpiraEn > Reloj.Ahora());
 
         return sesion?.Usuario;
     }

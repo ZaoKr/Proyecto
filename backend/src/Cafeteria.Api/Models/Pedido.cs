@@ -1,3 +1,5 @@
+using Cafeteria.Api.Data;
+
 namespace Cafeteria.Api.Models;
 
 public class Pedido
@@ -17,7 +19,7 @@ public class Pedido
 
     public decimal Total { get; set; }
     public string Notas { get; set; } = "";
-    public DateTime CreadoEn { get; set; } = DateTime.Now;
+    public DateTime CreadoEn { get; set; } = Reloj.Ahora();
 
     public List<PedidoItem> Items { get; set; } = new List<PedidoItem>();
 }

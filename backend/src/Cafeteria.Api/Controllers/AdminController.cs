@@ -27,7 +27,7 @@ public class AdminController : ControladorBase
             return ErrorSoloAdmin();
         }
 
-        DateTime hoy = DateTime.Today;
+        DateTime hoy = Reloj.Hoy();
         DateTime manana = hoy.AddDays(1);
 
         List<Pedido> pedidosHoy = await Db.Pedidos
