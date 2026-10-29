@@ -329,7 +329,38 @@ PUBLICARLO EN INTERNET
 
 El proyecto incluye un Dockerfile que compila el frontend y el backend juntos. El backend sirve la pagina y la API desde la misma direccion, asi que no hace falta configurar CORS ni publicar dos sitios separados.
 
-En Railway:
+La aplicacion puede guardar los datos de dos formas:
+
+- SQLite: un archivo. Se usa en local y en hostings con disco permanente.
+- PostgreSQL: un servidor de base de datos. Se usa en hostings sin disco permanente.
+
+El backend elige solo:
+
+- Si existe la variable DATABASE_URL, usa PostgreSQL.
+- Si no existe, usa SQLite en la ruta DB_PATH o en cafeteria.db.
+
+En Render:
+
+Render tiene un servicio web gratuito y una base PostgreSQL gratuita. No pide tarjeta. El servicio gratuito se apaga despues de 15 minutos sin uso y tarda entre 30 y 60 segundos en despertar. La base gratuita dura 30 dias, suficiente para una exposicion de un dia.
+
+1. Crear una cuenta en https://render.com con GitHub.
+2. Elegir New y luego Blueprint.
+3. Seleccionar el repositorio del proyecto y la rama main.
+4. Render lee el archivo render.yaml y crea el servicio y la base.
+5. Esperar a que termine el deploy.
+6. Abrir la URL que muestra el servicio.
+
+El archivo render.yaml ya configura el Dockerfile, la variable DATABASE_URL, la base PostgreSQL gratuita y la ruta /api/estado como health check.
+
+La primera vez que arranca, la aplicacion crea las tablas en PostgreSQL y copia los usuarios, productos, categorias, pedidos y sesiones que estan en cafeteria.db. Si la base ya tiene usuarios, no vuelve a copiar nada. Asi se conservan las cuentas y los productos.
+
+Para comprobar que usa PostgreSQL, abrir:
+
+https://la-url-del-servicio/api/estado
+
+Debe responder con "baseDatos":"PostgreSQL".
+
+En Railway con un volumen:
 
 1. Crear una cuenta con GitHub.
 2. Crear un proyecto nuevo y elegir Deploy from GitHub repo.
@@ -343,7 +374,7 @@ La primera vez, si el volumen esta vacio, la aplicacion copia cafeteria.db al vo
 
 La aplicacion lee la variable PORT que asigna el hosting y escucha en ese puerto. No hay que cambiar nada en el codigo.
 
-Si se usa otro hosting que acepte Docker, se puede usar el mismo Dockerfile y montar un volumen en /data. Sin volumen, SQLite se borra cada vez que el servicio se reinicia.
+Si se usa otro hosting que acepte Docker y tenga disco permanente, se puede usar el mismo Dockerfile y montar un volumen en /data. Sin volumen, SQLite se borra cada vez que el servicio se reinicia. Si el hosting no tiene disco permanente, hay que usar PostgreSQL con DATABASE_URL.
 
 
 USUARIOS DE PRUEBA
@@ -387,11 +418,13 @@ Tambien se probo el flujo completo con Playwright: registro, login, carrito, ped
 
 BASE DE DATOS
 
-La base esta en:
+En local, la base esta en:
 
 backend/src/Cafeteria.Api/cafeteria.db
 
 Se incluye en el proyecto para conservar los usuarios y los productos que ya estaban cargados. Si se borra, el backend crea otra base con los datos iniciales, pero se pierden las cuentas y los cambios que se hayan hecho.
+
+En Render, la base es PostgreSQL y la conexion se configura con la variable DATABASE_URL. La aplicacion crea las tablas y copia los datos de cafeteria.db la primera vez. En Railway con volumen, la base sigue siendo SQLite y se guarda en /data/cafeteria.db.
 
 Para hacer un respaldo:
 
@@ -469,6 +502,7 @@ COSAS A TENER EN CUENTA
 - El total del pedido se calcula en el backend, no en el frontend.
 - Las contrasenas se guardan con hash, no en texto plano.
 - Las sesiones se guardan en la base y vencen a los 7 dias.
+- En local y en Railway con volumen, los datos viven en SQLite. En Render, los datos viven en PostgreSQL.
 - El proyecto esta pensado para uso local y para practica. La version con Docker se puede publicar con HTTPS, pero para un uso real conviene revisar el manejo de tokens, cambiar las contrasenas de prueba y hacer respaldos de la base.
 
 FIN

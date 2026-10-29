@@ -18,6 +18,19 @@ public class CafeteriaContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        if (Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+        {
+            modelBuilder.Entity<Pedido>()
+                .Property(p => p.CreadoEn)
+                .HasColumnType("timestamp without time zone");
+
+            modelBuilder.Entity<Sesion>()
+                .Property(s => s.ExpiraEn)
+                .HasColumnType("timestamp without time zone");
+        }
+
         modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.Email)
             .IsUnique();

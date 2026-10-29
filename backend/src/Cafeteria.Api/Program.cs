@@ -14,34 +14,47 @@ if (!string.IsNullOrWhiteSpace(puerto))
 
 builder.Services.AddControllers();
 
-string rutaBaseDatos = Environment.GetEnvironmentVariable("DB_PATH");
+string urlPostgres = Environment.GetEnvironmentVariable("DATABASE_URL");
+bool usaPostgres = !string.IsNullOrWhiteSpace(urlPostgres);
 
-if (string.IsNullOrWhiteSpace(rutaBaseDatos))
+if (usaPostgres)
 {
-    rutaBaseDatos = Path.Combine(builder.Environment.ContentRootPath, "cafeteria.db");
+    string cadenaPostgres = ConfiguracionBaseDatos.CadenaPostgres(urlPostgres);
+
+    builder.Services.AddDbContext<CafeteriaContext>(options =>
+        options.UseNpgsql(cadenaPostgres));
 }
 else
 {
-    string carpeta = Path.GetDirectoryName(rutaBaseDatos);
+    string rutaBaseDatos = Environment.GetEnvironmentVariable("DB_PATH");
 
-    if (!string.IsNullOrWhiteSpace(carpeta))
+    if (string.IsNullOrWhiteSpace(rutaBaseDatos))
     {
-        Directory.CreateDirectory(carpeta);
+        rutaBaseDatos = Path.Combine(builder.Environment.ContentRootPath, "cafeteria.db");
     }
-
-    if (!File.Exists(rutaBaseDatos))
+    else
     {
-        string baseIncluida = Path.Combine(builder.Environment.ContentRootPath, "cafeteria.db");
+        string carpeta = Path.GetDirectoryName(rutaBaseDatos);
 
-        if (File.Exists(baseIncluida) && !string.Equals(baseIncluida, rutaBaseDatos, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(carpeta))
         {
-            File.Copy(baseIncluida, rutaBaseDatos);
+            Directory.CreateDirectory(carpeta);
+        }
+
+        if (!File.Exists(rutaBaseDatos))
+        {
+            string baseIncluida = Path.Combine(builder.Environment.ContentRootPath, "cafeteria.db");
+
+            if (File.Exists(baseIncluida) && !string.Equals(baseIncluida, rutaBaseDatos, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Copy(baseIncluida, rutaBaseDatos);
+            }
         }
     }
-}
 
-builder.Services.AddDbContext<CafeteriaContext>(options =>
-    options.UseSqlite("Data Source=" + rutaBaseDatos));
+    builder.Services.AddDbContext<CafeteriaContext>(options =>
+        options.UseSqlite("Data Source=" + rutaBaseDatos));
+}
 
 builder.Services.AddSingleton<PasswordHasher<Usuario>>();
 
@@ -87,6 +100,13 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     CafeteriaContext db = scope.ServiceProvider.GetRequiredService<CafeteriaContext>();
     db.Database.EnsureCreated();
+
+    if (usaPostgres)
+    {
+        string baseIncluida = Path.Combine(app.Environment.ContentRootPath, "cafeteria.db");
+        ImportadorSqlite.Importar(db, baseIncluida);
+    }
+
     DatosIniciales.Cargar(db);
 }
 
@@ -96,18 +116,10 @@ app.UseStaticFiles();
 
 app.MapControllers();
 
-app.MapGet("/", () => Results.Ok(new
-{
-    api = "Cafetería Aroma",
-    mensaje = "La API está funcionando.",
-    baseDatos = "SQLite",
-    estado = "/api/estado"
-}));
-
 app.MapGet("/api/estado", () => Results.Ok(new
 {
     estado = "ok",
-    baseDatos = "SQLite",
+    baseDatos = usaPostgres ? "PostgreSQL" : "SQLite",
     hora = DateTime.Now
 }));
 
