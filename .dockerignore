@@ -1,0 +1,13 @@
+.git
+.gitignore
+README.txt
+frontend/node_modules
+frontend/dist
+frontend/.angular
+frontend/coverage
+backend/bin
+backend/obj
+backend/**/bin
+backend/**/obj
+**/*.log
+**/*.tmp

@@ -194,9 +194,7 @@ Las rutas estan en app.routes.ts:
 
 La barra de navegacion esta en app.html. Muestra el menu, el carrito y el nombre del usuario. Si hay una sesion iniciada, muestra Mis pedidos y el boton Salir. Si el usuario es administrador, tambien muestra el enlace Admin. Si no hay sesion, muestra Iniciar sesion y Registrarse.
 
-La direccion de la API esta en api.config.ts:
-
-export const API_URL = 'http://localhost:5196/api';
+La direccion de la API esta en api.config.ts. Cuando la pagina se abre con el servidor de Angular en el puerto 4200 o 4201, usa http://localhost:5196/api. En la version publicada usa /api, porque el mismo backend sirve la pagina y la API.
 
 Los servicios usan esa direccion para armar las peticiones. Por ejemplo, AuthService llama a /auth/login, CatalogoService llama a /productos y PedidoService llama a /pedidos.
 
@@ -284,7 +282,7 @@ Content-Type: application/json
 
 El backend revisa el token, valida los datos, calcula el total y guarda el pedido. Despues devuelve el pedido creado.
 
-El navegador aplica una regla de seguridad llamada CORS. Como el frontend esta en el puerto 4200 y el backend en el 5196, son dos origenes distintos. El backend tiene una politica CORS que permite peticiones desde localhost y desde 127.0.0.1. Por eso la aplicacion funciona en local. Si el frontend se abre desde otra direccion, esa politica tiene que cambiarse.
+El navegador aplica una regla de seguridad llamada CORS. En local, el frontend esta en el puerto 4200 y el backend en el 5196, asi que son dos origenes distintos. El backend tiene una politica CORS que permite peticiones desde localhost y desde 127.0.0.1. En la version publicada con Docker, el backend sirve el frontend compilado y la API desde el mismo origen, por eso no hay problema de CORS.
 
 
 COMO SE EJECUTA
@@ -325,6 +323,27 @@ El frontend queda disponible en http://localhost:4200. Si ese puerto esta ocupad
 npm start -- --port 4201
 
 Para detener cualquiera de los dos, presiona Ctrl + C en su terminal.
+
+
+PUBLICARLO EN INTERNET
+
+El proyecto incluye un Dockerfile que compila el frontend y el backend juntos. El backend sirve la pagina y la API desde la misma direccion, asi que no hace falta configurar CORS ni publicar dos sitios separados.
+
+En Railway:
+
+1. Crear una cuenta con GitHub.
+2. Crear un proyecto nuevo y elegir Deploy from GitHub repo.
+3. Seleccionar el repositorio del proyecto.
+4. Agregar un volumen y montarlo en /data.
+5. Agregar la variable DB_PATH con el valor /data/cafeteria.db.
+6. Esperar el deploy.
+7. Generar un dominio publico desde la opcion de networking o domains.
+
+La primera vez, si el volumen esta vacio, la aplicacion copia cafeteria.db al volumen. Despues todos los cambios quedan guardados ahi. Si el servicio se reinicia o se vuelve a desplegar, la base no se pierde.
+
+La aplicacion lee la variable PORT que asigna el hosting y escucha en ese puerto. No hay que cambiar nada en el codigo.
+
+Si se usa otro hosting que acepte Docker, se puede usar el mismo Dockerfile y montar un volumen en /data. Sin volumen, SQLite se borra cada vez que el servicio se reinicia.
 
 
 USUARIOS DE PRUEBA
@@ -443,13 +462,13 @@ El frontend se esta abriendo desde una direccion que el backend no permite. En l
 
 COSAS A TENER EN CUENTA
 
-- El backend y el frontend son dos programas distintos. Se levantan en terminales separadas.
+- En local, el backend y el frontend son dos programas distintos y se levantan en terminales separadas. En la version publicada con Docker, el backend sirve el frontend compilado.
 - El frontend necesita al backend para cargar datos, iniciar sesion y confirmar pedidos.
 - El backend no necesita al frontend para funcionar. Se puede probar con curl o con Postman.
 - El carrito se guarda en el navegador, no en la base, hasta que se confirma el pedido.
 - El total del pedido se calcula en el backend, no en el frontend.
 - Las contrasenas se guardan con hash, no en texto plano.
 - Las sesiones se guardan en la base y vencen a los 7 dias.
-- El proyecto esta pensado para uso local y para practica. Para publicarlo en internet habria que usar HTTPS, limitar CORS al dominio real y proteger mejor los tokens.
+- El proyecto esta pensado para uso local y para practica. La version con Docker se puede publicar con HTTPS, pero para un uso real conviene revisar el manejo de tokens, cambiar las contrasenas de prueba y hacer respaldos de la base.
 
 FIN
